@@ -31,7 +31,7 @@ function draw() {
   }
 
   if (micStarted) {
-    micLevel = mic.getLevel(); // volumen de 0.0 a 1.0
+    micLevel = mic.getLevel();
   }
 
   cam.loadPixels();
@@ -50,22 +50,23 @@ function draw() {
     p.brillo = brillo;
 
     if (tocando) {
-      // CLICK → Agrupación a la forma original
+      // CLICK → regresar a la forma base
       p.x = lerp(p.x, p.baseX, 0.25);
       p.y = lerp(p.y, p.baseY, 0.25);
     } else if (micLevel > 0.01) {
-      // CON SONIDO → comportamiento caótico, no responde a la cámara
-      let caos = map(micLevel, 0, 1, 2, 30); // entre más sonido, más locura
-      p.x += random(-caos, caos);
-      p.y += random(-caos, caos);
+      // CON SONIDO → dispersión progresiva hacia todo el canvas
+      let caos = map(micLevel, 0, 1, 0.002, 0.05); // más bajo = más lento
+      let targetX = random(width);
+      let targetY = random(height);
+      p.x = lerp(p.x, targetX, caos);
+      p.y = lerp(p.y, targetY, caos);
     } else {
-      // SIN SONIDO → dispersión basada en imagen de cámara (brillo)
-      let dispersión = map(p.brillo, 0, 255, 0.5, 2);
+      // SIN SONIDO → leve dispersión orgánica basada en la imagen
+      let dispersión = map(p.brillo, 0, 255, 0.3, 1.2);
       p.dx += random(-dispersión, dispersión) * 0.05;
       p.dy += random(-dispersión, dispersión) * 0.05;
-      p.dx = constrain(p.dx, -2, 2);
-      p.dy = constrain(p.dy, -2, 2);
-
+      p.dx = constrain(p.dx, -1, 1);
+      p.dy = constrain(p.dy, -1, 1);
       p.x += p.dx;
       p.y += p.dy;
     }
@@ -78,7 +79,7 @@ function draw() {
     }
   }
 
-  // Visualizador de volumen
+  // Visualizador del volumen
   let diam = map(micLevel, 0, 1, 10, 200);
   fill(0, 30);
   noStroke();
